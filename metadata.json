@@ -1,0 +1,5 @@
+{
+  "name": "靈靈染 · 命運觀測站 (Fortune Teller)",
+  "description": "An advanced fortune-telling application integrating Bazi (Eight Characters), Western Astrology, and Tarot readings powered by Gemini AI.",
+  "requestFramePermissions": []
+}
