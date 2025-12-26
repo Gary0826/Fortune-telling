@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>靈靈染 · 命運觀測站</title>
+  <title>靈靈染 · 命運觀測站 - AI 命理與塔羅占卜</title>
+  <meta name="description" content="結合人工智慧與傳統命理，為您提供最準確的八字、星盤與塔羅占卜建議。">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
@@ -12,14 +13,47 @@
       font-family: 'Noto+Sans+TC', sans-serif;
       background-color: #020617;
       color: #e2e8f0;
+      margin: 0;
+      overflow-x: hidden;
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    .perspective-1000 { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
+    .mystic-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
+      z-index: -1;
+    }
+
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background-image: 
+        radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 50px 160px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 80px 120px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 110px 210px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      opacity: 0.3;
+      animation: stars-move 100s linear infinite;
+    }
+
+    @keyframes stars-move {
+      from { transform: translateY(0); }
+      to { transform: translateY(-200px); }
+    }
 
     @keyframes shimmer {
       100% { transform: translateX(100%); }
@@ -31,6 +65,14 @@
       50% { transform: translateY(-10px); }
     }
     .animate-float { animation: float 3s ease-in-out infinite; }
+
+    .card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card-selected .card-inner {
+      transform: rotateY(180deg);
+    }
   </style>
 <script type="importmap">
 {
@@ -45,6 +87,9 @@
 </script>
 </head>
 <body>
+  <div class="mystic-bg"></div>
+  <div class="stars"></div>
   <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
 </body>
 </html>
