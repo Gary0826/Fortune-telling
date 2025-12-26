@@ -65,23 +65,17 @@
       50% { transform: translateY(-10px); }
     }
     .animate-float { animation: float 3s ease-in-out infinite; }
-
-    .card-inner {
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-    }
-    .card-selected .card-inner {
-      transform: rotateY(180deg);
-    }
   </style>
 <script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "@google/genai": "https://esm.sh/@google/genai@1.3.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
@@ -90,6 +84,7 @@
   <div class="mystic-bg"></div>
   <div class="stars"></div>
   <div id="root"></div>
+  <!-- 使用相對路徑並確保副檔名正確 -->
   <script type="module" src="./index.tsx"></script>
 </body>
 </html>

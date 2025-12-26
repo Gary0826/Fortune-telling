@@ -1,5 +1,5 @@
 
-import { HEAVENLY_STEMS, EARTHLY_BRANCHES, ZODIAC_ANIMALS } from './constants';
+import { HEAVENLY_STEMS, EARTHLY_BRANCHES, ZODIAC_ANIMALS } from './constants.tsx';
 
 export const calculateBazi = (year: number, month: number, day: number) => {
   let baziYear = year;

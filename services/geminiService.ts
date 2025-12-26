@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { ReadingMode, ReadingResult, SelectedTarot } from "../types";
+import { ReadingMode, ReadingResult, SelectedTarot } from "../types.ts";
 
 export const fetchInterpretation = async (result: ReadingResult): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });

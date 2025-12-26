@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sparkles, Star, Search, RotateCcw, ArrowRight, User, 
-  MessageCircle, Compass, History, Info, Menu, ChevronLeft
+  Sparkles, Star, RotateCcw, ArrowRight, User, 
+  MessageCircle, Compass, Info, ChevronLeft
 } from 'lucide-react';
-import { ReadingMode, UserInfo, ReadingResult, SelectedTarot, TarotCard } from './types';
-import { calculateBazi, calculateAstroDetails } from './utils';
-import { FULL_DECK } from './constants';
-import { fetchInterpretation } from './services/geminiService';
+import { ReadingMode, UserInfo, ReadingResult, SelectedTarot, TarotCard } from './types.ts';
+import { calculateBazi, calculateAstroDetails } from './utils.ts';
+import { FULL_DECK } from './constants.tsx';
+import { fetchInterpretation } from './services/geminiService.ts';
 
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
   <div className={`bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-10 shadow-2xl ${className}`}>
@@ -43,8 +43,12 @@ const Button: React.FC<{
 const App: React.FC = () => {
   const [step, setStep] = useState(1);
   const [userInfo, setUserInfo] = useState<UserInfo>(() => {
-    const saved = localStorage.getItem('fortune_user_info');
-    return saved ? JSON.parse(saved) : { year: 1998, month: 8, day: 8, hour: 12, minute: 0 };
+    try {
+      const saved = localStorage.getItem('fortune_user_info');
+      return saved ? JSON.parse(saved) : { year: 1998, month: 8, day: 8, hour: 12, minute: 0 };
+    } catch {
+      return { year: 1998, month: 8, day: 8, hour: 12, minute: 0 };
+    }
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ReadingResult | null>(null);
@@ -66,7 +70,6 @@ const App: React.FC = () => {
     setResult(null);
     setSelectedCards([]);
     
-    // 模擬複雜運算延遲以增加儀式感
     setTimeout(() => {
       if (mode === ReadingMode.TAROT) {
         setLoading(false);
@@ -102,7 +105,7 @@ const App: React.FC = () => {
   const handlePickTarot = (card: TarotCard) => {
     if (selectedCards.length >= 3) return;
     if (selectedCards.some(c => c.card.id === card.id)) return;
-    const isReversed = Math.random() > 0.7; // 30% 機率逆位
+    const isReversed = Math.random() > 0.7;
     setSelectedCards(prev => [...prev, { card, isReversed }]);
   };
 
@@ -125,6 +128,7 @@ const App: React.FC = () => {
       setResult(prev => prev ? { ...prev, aiInterpretation: interpretation } : null);
     } catch (e) {
       console.error(e);
+      setResult(prev => prev ? { ...prev, aiInterpretation: "抱歉，目前無法連結宇宙意志，請稍後再試。" } : null);
     } finally {
       setAiLoading(false);
     }
@@ -132,8 +136,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start py-10 px-4 md:py-20">
-      
-      {/* 動態標題區域 */}
       <header className={`text-center transition-all duration-700 max-w-2xl ${step === 4 ? 'mb-8 scale-90' : 'mb-16'}`}>
         <div 
           onClick={() => { setStep(1); setResult(null); }}
