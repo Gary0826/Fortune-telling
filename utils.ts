@@ -1,4 +1,4 @@
-import { Equator, SunPosition, GeoVector, Observer, SiderealTime } from 'astronomy-engine';
+import { SunPosition, EclipticGeoMoon, Observer, SiderealTime } from 'astronomy-engine';
 import { HEAVENLY_STEMS, EARTHLY_BRANCHES, ZODIAC_ANIMALS } from './constants.tsx';
 
 export const calculateBazi = (year: number, month: number, day: number) => {
@@ -35,12 +35,12 @@ export const calculateAstroDetails = (year: number, month: number, day: number, 
   const date = new Date(year, month - 1, day, hour, minute);
   const observer = new Observer(25.0330, 121.5654, 0); // 默認台北 (Taipei 101)
 
-  // Equator is not needed if we use GeoVector or specific functions, 
-  // but we keep imports if we need them later.
-  // Actually we need Ecliptic Longitude.
-
+  // SunPosition returns EclipticCoordinates { ecliptic_longitude, ... }
   const sunLong = SunPosition(date).ecliptic_longitude;
-  const moonLong = GeoVector('Moon', date, true).ecliptic_longitude;
+
+  // EclipticGeoMoon returns Spherical { lat, lon, dist }
+  // lon is Ecliptic Longitude
+  const moonLong = EclipticGeoMoon(date).lon;
 
   // 上升星座計算 (Ascendant)
   // 1. Calculate Greenwich Sidereal Time (GST)
@@ -57,17 +57,8 @@ export const calculateAstroDetails = (year: number, month: number, day: number, 
   const moonSign = getZodiacSign(moonLong);
 
   // 上升估算
-  // LST 0h ~ Aries rising. 
-  // 24h / 12 signs = 2h per sign.
-  // Formula approx: (LST + offset) / 2
-  // Let's assume LST 0h -> Aries (0).
-  const risingIdx = Math.floor(((lst + 6) / 2) % 12);
-  // +6h offset is empirical for MC alignment? 
-  // Actually usually RAMC = LST * 15. ASC = RAMC + 90.
-  // RAMC + 90deg = LST*15 + 90.
-  // (LST*15 + 90) / 30 = LST/2 + 3.
-  const risingIdxRefined = Math.floor((lst / 2 + 3) % 12);
-  const risingSign = signs[risingIdxRefined];
+  const risingIdx = Math.floor((lst / 2 + 3) % 12);
+  const risingSign = signs[risingIdx];
 
   return { sun: sunSign, moon: moonSign, rising: risingSign };
 };
