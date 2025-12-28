@@ -25,9 +25,12 @@ export const calculateBazi = (year: number, month: number, day: number) => {
 
 const getZodiacSign = (long: number): string => {
   const signs = ["牡羊座", "金牛座", "雙子座", "巨蟹座", "獅子座", "處女座", "天秤座", "天蠍座", "射手座", "摩羯座", "水瓶座", "雙魚座"];
-  // 0 is Aries 0deg
-  const idx = Math.floor(long / 30) % 12;
-  return signs[idx];
+  // Normalize longitude to 0-360 just in case
+  let normalized = long % 360;
+  if (normalized < 0) normalized += 360;
+
+  const idx = Math.floor(normalized / 30) % 12;
+  return signs[idx] || "未知"; // Fallback just in case
 };
 
 export const calculateAstroDetails = (year: number, month: number, day: number, hour: number, minute: number) => {
