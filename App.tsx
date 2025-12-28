@@ -165,7 +165,7 @@ const App: React.FC = () => {
                 <h2 className="text-xl font-bold text-white">出生時刻配置</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-400 ml-1">出生日期</label>
