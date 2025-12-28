@@ -4,7 +4,7 @@ import { ReadingMode, ReadingResult, SelectedTarot } from "../types.ts";
 
 export const fetchInterpretation = async (result: ReadingResult): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-  
+
   let prompt = "";
   const systemInstruction = "你是專業命理師「靈靈染」。語氣溫柔、專業、富有同理心且具神秘感。請用繁體中文回覆，針對用戶情況給予具體建議。";
 
@@ -21,8 +21,9 @@ export const fetchInterpretation = async (result: ReadingResult): Promise<string
     prompt = `用戶的太陽星座是${sun}，月亮星座是${moon}，上升星座是${rising}。請根據這黃金三角分析性格特質與近期運勢（事業、愛情、健康），並提供成長建議。`;
   } else if (result.type === ReadingMode.BAZI) {
     const { main, element } = result.details;
-    prompt = `用戶的八字年柱為${main}，五行屬${element}。請根據五行生剋原理，分析用戶今年的流年運勢，並在事業、人際、健康方面給予指導。`;
+    prompt = `用戶的八字年柱為${main}，五行屬${element}。現在是 ${new Date().getFullYear()} 年，請根據五行生剋原理，分析用戶今年的流年運勢，並在事業、人際、健康方面給予指導。`;
   }
+
 
   try {
     const response = await ai.models.generateContent({

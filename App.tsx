@@ -170,9 +170,9 @@ const App: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-400 ml-1">出生日期</label>
                     <div className="grid grid-cols-4 gap-2">
-                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="年" />
-                      <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="月" />
-                      <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="日" />
+                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="年" />
+                      <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="月" />
+                      <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="日" />
                     </div>
                   </div>
                 </div>
