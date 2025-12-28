@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Sparkles, Star, RotateCcw, ArrowRight, User, 
+import {
+  Sparkles, Star, RotateCcw, ArrowRight, User,
   MessageCircle, Compass, Info, ChevronLeft
 } from 'lucide-react';
 import { ReadingMode, UserInfo, ReadingResult, SelectedTarot, TarotCard } from './types.ts';
@@ -15,12 +15,12 @@ const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ chi
   </div>
 );
 
-const Button: React.FC<{ 
-  onClick?: () => void; 
-  children: React.ReactNode; 
-  className?: string; 
-  disabled?: boolean; 
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' 
+const Button: React.FC<{
+  onClick?: () => void;
+  children: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
 }> = ({ onClick, children, className = "", disabled = false, variant = 'primary' }) => {
   const variants = {
     primary: 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-violet-500',
@@ -69,7 +69,7 @@ const App: React.FC = () => {
     setLoading(true);
     setResult(null);
     setSelectedCards([]);
-    
+
     setTimeout(() => {
       if (mode === ReadingMode.TAROT) {
         setLoading(false);
@@ -137,7 +137,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-start py-10 px-4 md:py-20">
       <header className={`text-center transition-all duration-700 max-w-2xl ${step === 4 ? 'mb-8 scale-90' : 'mb-16'}`}>
-        <div 
+        <div
           onClick={() => { setStep(1); setResult(null); }}
           className="group inline-flex cursor-pointer items-center gap-2.5 px-5 py-2.5 bg-indigo-500/10 rounded-full mb-6 ring-1 ring-indigo-400/20 hover:bg-indigo-500/20 transition-all"
         >
@@ -148,9 +148,9 @@ const App: React.FC = () => {
           {step === 4 ? '命運的啟示' : '探索宇宙的私語'}
         </h1>
         <p className="text-slate-400 text-lg font-medium max-w-md mx-auto leading-relaxed">
-          {step === 1 ? '請輸入您的出生資訊，讓群星為您指引方向。' : 
-           step === 2 ? '選擇一種連結方式，開展您的命運之旅。' :
-           step === 3 ? '深呼吸三次，靜下心來，直覺選出三張牌。' : '宇宙的能量已經凝聚，請細品下方的解讀。'}
+          {step === 1 ? '請輸入您的出生資訊，讓群星為您指引方向。' :
+            step === 2 ? '選擇一種連結方式，開展您的命運之旅。' :
+              step === 3 ? '深呼吸三次，靜下心來，直覺選出三張牌。' : '宇宙的能量已經凝聚，請細品下方的解讀。'}
         </p>
       </header>
 
@@ -164,13 +164,13 @@ const App: React.FC = () => {
                 </div>
                 <h2 className="text-xl font-bold text-white">出生時刻配置</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-400 ml-1">出生日期</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="年" />
+                    <div className="grid grid-cols-4 gap-2">
+                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="年" />
                       <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="月" />
                       <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="日" />
                     </div>
@@ -186,7 +186,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <Button onClick={() => setStep(2)} className="w-full mt-10 h-14 text-lg">
                 確認資訊，選擇占卜 <ArrowRight className="w-5 h-5" />
               </Button>
@@ -201,9 +201,9 @@ const App: React.FC = () => {
               { mode: ReadingMode.ASTRO, icon: Star, title: '西洋占星', desc: '解碼星盤配置，對齊靈魂頻率', color: 'from-purple-500 to-indigo-500' },
               { mode: ReadingMode.TAROT, icon: Sparkles, title: '神諭塔羅', desc: '針對當下困惑提供直觀的啟示', color: 'from-pink-500 to-rose-500' }
             ].map((item, idx) => (
-              <button 
+              <button
                 key={idx}
-                onClick={() => startReading(item.mode)} 
+                onClick={() => startReading(item.mode)}
                 className="group relative bg-slate-900/40 backdrop-blur-md border border-slate-700 hover:border-indigo-500/50 rounded-3xl p-8 text-left transition-all hover:scale-[1.03] hover:shadow-2xl shadow-indigo-500/10"
               >
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform`}>
@@ -217,7 +217,7 @@ const App: React.FC = () => {
               </button>
             ))}
             <div className="md:col-span-3 flex justify-center mt-6">
-               <Button variant="ghost" onClick={() => setStep(1)}><ChevronLeft className="w-4 h-4" /> 返回修改資料</Button>
+              <Button variant="ghost" onClick={() => setStep(1)}><ChevronLeft className="w-4 h-4" /> 返回修改資料</Button>
             </div>
           </div>
         )}
@@ -240,13 +240,13 @@ const App: React.FC = () => {
         {step === 3 && (
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="flex justify-between items-center mb-8">
-               <Button variant="ghost" onClick={() => setStep(2)}><ChevronLeft className="w-4 h-4" /> 重新選擇</Button>
-               <div className="text-indigo-300 font-bold bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20">
-                 已選擇 {selectedCards.length} / 3 張
-               </div>
+              <Button variant="ghost" onClick={() => setStep(2)}><ChevronLeft className="w-4 h-4" /> 重新選擇</Button>
+              <div className="text-indigo-300 font-bold bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20">
+                已選擇 {selectedCards.length} / 3 張
+              </div>
             </div>
-            
-            <div 
+
+            <div
               ref={scrollRef}
               className="flex overflow-x-auto gap-6 pb-12 pt-6 px-4 hide-scrollbar snap-x snap-mandatory"
             >
@@ -254,30 +254,30 @@ const App: React.FC = () => {
                 const isSelected = selectedCards.some(c => c.card.id === card.id);
                 const order = selectedCards.findIndex(c => c.card.id === card.id) + 1;
                 return (
-                  <div 
+                  <div
                     key={card.id}
                     onClick={() => handlePickTarot(card)}
                     className={`flex-shrink-0 w-44 h-72 md:w-48 md:h-80 rounded-2xl border-2 transition-all duration-500 cursor-pointer snap-center relative group overflow-hidden
                     ${isSelected ? 'border-indigo-400 -translate-y-6 scale-105 shadow-2xl shadow-indigo-500/40' : 'border-indigo-900/50 bg-indigo-950/20 hover:border-indigo-500/40 hover:-translate-y-2'}`}
                   >
-                     <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors"></div>
-                     <div className="h-full w-full flex flex-col items-center justify-center p-6 text-center">
-                       {isSelected ? (
-                         <div className="animate-in zoom-in duration-300 flex flex-col items-center">
-                           <div className="w-12 h-12 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-xl mb-4">
-                             {order}
-                           </div>
-                           <p className="text-indigo-200 font-bold text-sm tracking-widest uppercase">已選中</p>
-                         </div>
-                       ) : (
-                         <>
-                           <div className="w-16 h-16 border-2 border-indigo-500/20 rounded-full flex items-center justify-center mb-4 group-hover:border-indigo-500/40 group-hover:scale-110 transition-all">
-                             <Sparkles className="text-indigo-500/30 group-hover:text-indigo-400" />
-                           </div>
-                           <p className="text-indigo-900/40 font-bold text-xs group-hover:text-indigo-400/50 transition-colors uppercase tracking-widest">Oracle Card</p>
-                         </>
-                       )}
-                     </div>
+                    <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors"></div>
+                    <div className="h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                      {isSelected ? (
+                        <div className="animate-in zoom-in duration-300 flex flex-col items-center">
+                          <div className="w-12 h-12 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-xl mb-4">
+                            {order}
+                          </div>
+                          <p className="text-indigo-200 font-bold text-sm tracking-widest uppercase">已選中</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-16 h-16 border-2 border-indigo-500/20 rounded-full flex items-center justify-center mb-4 group-hover:border-indigo-500/40 group-hover:scale-110 transition-all">
+                            <Sparkles className="text-indigo-500/30 group-hover:text-indigo-400" />
+                          </div>
+                          <p className="text-indigo-900/40 font-bold text-xs group-hover:text-indigo-400/50 transition-colors uppercase tracking-widest">Oracle Card</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -302,7 +302,7 @@ const App: React.FC = () => {
                   <p className="text-indigo-400 font-medium">{result.summary}</p>
                 </div>
                 <div className="flex gap-2">
-                   <Button variant="secondary" onClick={() => { setStep(2); setResult(null); }} className="h-12"><RotateCcw className="w-4 h-4" /> 重新占卜</Button>
+                  <Button variant="secondary" onClick={() => { setStep(2); setResult(null); }} className="h-12"><RotateCcw className="w-4 h-4" /> 重新占卜</Button>
                 </div>
               </div>
 
@@ -314,7 +314,7 @@ const App: React.FC = () => {
                         {i === 0 ? "過去 / 現狀" : i === 1 ? "核心 / 挑戰" : "建議 / 未來"}
                       </div>
                       <div className={`text-4xl mb-6 transition-transform duration-700 inline-block ${c.isReversed ? 'rotate-180 drop-shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'drop-shadow-[0_0_10px_rgba(99,102,241,0.3)]'}`}>
-                         🎴
+                        🎴
                       </div>
                       <h4 className="text-xl font-bold text-white mb-2">{c.card.name}</h4>
                       <div className={`text-xs font-bold px-3 py-1.5 rounded-lg inline-block ${c.isReversed ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
@@ -357,15 +357,15 @@ const App: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-8 flex justify-center">
-                       <Button variant="outline" onClick={() => window.print()} className="h-12"><Info className="w-4 h-4" /> 匯出我的命運報告</Button>
+                      <Button variant="outline" onClick={() => window.print()} className="h-12"><Info className="w-4 h-4" /> 匯出我的命運報告</Button>
                     </div>
                   </div>
                 )}
               </div>
             </Card>
-            
+
             <footer className="text-center py-10 opacity-40 hover:opacity-100 transition-opacity">
-               <p className="text-slate-500 text-xs">© 2025 靈靈染命運觀測站. 所有解析僅供參考，未來掌握在您的手中。</p>
+              <p className="text-slate-500 text-xs">© 2025 靈靈染命運觀測站. 所有解析僅供參考，未來掌握在您的手中。</p>
             </footer>
           </div>
         )}
