@@ -1,4 +1,4 @@
-import { SunPosition, EclipticGeoMoon, Observer, SiderealTime } from 'astronomy-engine';
+import { SunPosition, GeoMoon, Ecliptic, Observer, SiderealTime } from 'astronomy-engine';
 import { HEAVENLY_STEMS, EARTHLY_BRANCHES, ZODIAC_ANIMALS } from './constants.tsx';
 
 export const calculateBazi = (year: number, month: number, day: number) => {
@@ -36,19 +36,17 @@ const getZodiacSign = (long: number): string => {
 export const calculateAstroDetails = (year: number, month: number, day: number, hour: number, minute: number) => {
   // 使用 astronomy-engine 計算
   const date = new Date(year, month - 1, day, hour, minute);
-  const observer = new Observer(25.0330, 121.5654, 0); // 默認台北 (Taipei 101)
 
   // SunPosition returns EclipticCoordinates { elon, elat, vec }
   const sunLong = SunPosition(date).elon;
 
-  // EclipticGeoMoon returns Spherical { lat, lon, dist }
-  // lon is Ecliptic Longitude
-  const moonLong = EclipticGeoMoon(date).lon;
+  // GeoMoon returns Vector (J2000 EQJ).
+  // We must convert to Ecliptic coordinates to get longitude.
+  const moonVec = GeoMoon(date);
+  const moonLong = Ecliptic(moonVec).elon;
 
   // 上升星座計算 (Ascendant)
-  // 1. Calculate Greenwich Sidereal Time (GST)
-  // 2. Local Sidereal Time (LST) = GST + Longitude/15
-  const date2 = new Date(Date.UTC(year, month - 1, day, hour - 8, minute)); // Convert to UTC approx
+  const date2 = new Date(Date.UTC(year, month - 1, day, hour - 8, minute));
   const gst = SiderealTime(date2);
   const lst = (gst + 121.5654 / 15) % 24; // Taipei/Taiwan longitude
 
