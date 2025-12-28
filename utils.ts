@@ -38,8 +38,8 @@ export const calculateAstroDetails = (year: number, month: number, day: number, 
   const date = new Date(year, month - 1, day, hour, minute);
   const observer = new Observer(25.0330, 121.5654, 0); // 默認台北 (Taipei 101)
 
-  // SunPosition returns EclipticCoordinates { ecliptic_longitude, ... }
-  const sunLong = SunPosition(date).ecliptic_longitude;
+  // SunPosition returns EclipticCoordinates { elon, elat, vec }
+  const sunLong = SunPosition(date).elon;
 
   // EclipticGeoMoon returns Spherical { lat, lon, dist }
   // lon is Ecliptic Longitude
