@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,36 @@
   <meta name="description" content="結合人工智慧與傳統命理，為您提供最準確的八字、星盤與塔羅占卜建議。">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.process = window.process || { env: { NODE_ENV: 'production' } };
+    window.onerror = function (msg, url, line, col, error) {
+      const div = document.createElement('div');
+      div.style.position = 'fixed';
+      div.style.top = '0';
+      div.style.left = '0';
+      div.style.width = '100%';
+      div.style.backgroundColor = 'red';
+      div.style.color = 'white';
+      div.style.padding = '20px';
+      div.style.zIndex = '9999';
+      div.style.whiteSpace = 'pre-wrap';
+      div.innerText = 'Error: ' + msg + '\n' + (error ? error.stack : '');
+      document.body.appendChild(div);
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      const div = document.createElement('div');
+      div.style.position = 'fixed';
+      div.style.top = '50px';
+      div.style.left = '0';
+      div.style.width = '100%';
+      div.style.backgroundColor = 'darkred';
+      div.style.color = 'white';
+      div.style.padding = '20px';
+      div.style.zIndex = '9999';
+      div.innerText = 'Promise Error: ' + event.reason;
+      document.body.appendChild(div);
+    });
+  </script>
   <style>
     body {
       font-family: 'Noto+Sans+TC', sans-serif;
@@ -16,9 +46,16 @@
       margin: 0;
       overflow-x: hidden;
     }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
     .mystic-bg {
       position: fixed;
       top: 0;
@@ -37,13 +74,13 @@
       height: 100%;
       pointer-events: none;
       z-index: -1;
-      background-image: 
-        radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 50px 160px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 80px 120px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 110px 210px, #fff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0));
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 50px 160px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 80px 120px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 110px 210px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(1px 1px at 150px 150px, #fff, rgba(0, 0, 0, 0));
       background-repeat: repeat;
       background-size: 200px 200px;
       opacity: 0.3;
@@ -51,23 +88,44 @@
     }
 
     @keyframes stars-move {
-      from { transform: translateY(0); }
-      to { transform: translateY(-200px); }
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(-200px);
+      }
     }
 
     @keyframes shimmer {
-      100% { transform: translateX(100%); }
+      100% {
+        transform: translateX(100%);
+      }
     }
-    .animate-shimmer { animation: shimmer 2s infinite; }
-    
+
+    .animate-shimmer {
+      animation: shimmer 2s infinite;
+    }
+
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
-    .animate-float { animation: float 3s ease-in-out infinite; }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
   </style>
 
 </head>
+
 <body>
   <div class="mystic-bg"></div>
   <div class="stars"></div>
@@ -75,4 +133,5 @@
   <!-- 使用相對路徑並確保副檔名正確 -->
   <script type="module" src="./index.tsx"></script>
 </body>
+
 </html>
