@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Env Files
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+
+# Misc
+.DS_Store
+*.pem
