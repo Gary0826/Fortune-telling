@@ -30,13 +30,16 @@ export const fetchInterpretation = async (result: ReadingResult): Promise<string
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const response = await model.generateContent(prompt);
     const text = response.response.text();
     return text || "占卜能量暫時中斷，請稍後再試。";
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    return `連線失敗：${error?.message || '模型目前無回應'}，請稍後再試。`;
+    if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
+      return "【權限錯誤】：請檢查 API Key 是否限制了網域，需允許 https://gary0826.github.io/*";
+    }
+    return `連線失敗：${error?.message || '大師正在整理思緒'}，請稍後再試。`;
   }
 };
 
@@ -54,7 +57,7 @@ export const chatWithAI = async (
   const systemInstruction = "你是專業命理大師「玄微老師」。用戶正在針對剛才的占卜結果向你請教。請保持專業與同理心，給予具體的解析與建議。";
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const chat = model.startChat({
       history: history.map(h => ({
         role: h.role === 'model' ? 'model' : 'user',
@@ -67,6 +70,9 @@ export const chatWithAI = async (
     return response.text() || "大師正在冥想中，請稍後再試。";
   } catch (error: any) {
     console.error("Chat Error:", error);
+    if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
+      return "【權限錯誤】：API Key 網域限制。";
+    }
     return `對話失敗：${error?.message || '請稍後再試'}`;
   }
 };
