@@ -29,18 +29,29 @@ export const fetchInterpretation = async (result: ReadingResult): Promise<string
     prompt = `${systemInstruction}\n\n今天是 ${dateStr}。用戶的八字為：年柱 ${year}, 月柱 ${month}, 日柱 ${day}, 時柱 ${hour}。請根據五行生剋與格局，分析用戶的性格、大運趨勢，並在事業、人際、健康方面給予指導。`;
   }
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const response = await model.generateContent(prompt);
-    const text = response.response.text();
-    return text || "占卜能量暫時中斷，請稍後再試。";
-  } catch (error: any) {
-    console.error("Gemini Error:", error);
-    if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
-      return "【權限錯誤】：請檢查 API Key 是否限制了網域，需允許 https://gary0826.github.io/*";
+  const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash", "gemini-pro"];
+
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const response = await model.generateContent(prompt);
+      const text = response.response.text();
+      if (text) return text;
+    } catch (error: any) {
+      console.warn(`Model ${modelName} failed, trying next...`, error.message);
+      if (modelName === modelsToTry[modelsToTry.length - 1]) {
+        console.error("All models failed:", error);
+        if (error?.message?.includes('quota') || error?.message?.includes('429')) {
+          return "【連線頻率過高】：大師目前的免費額度已用完（Gemini Free Tier 限制）。請於 1 小時後再試，或更換 API Key。";
+        }
+        if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
+          return "【權限錯誤】：請檢查 API Key 網域限制，需允許 https://gary0826.github.io/*";
+        }
+        return `連線失敗：${error?.message || '大師正在整理思緒'}，請稍後再試。`;
+      }
     }
-    return `連線失敗：${error?.message || '大師正在整理思緒'}，請稍後再試。`;
   }
+  return "占卜能量暫時中斷，請稍後再試。";
 };
 
 /**
@@ -56,23 +67,31 @@ export const chatWithAI = async (
   const genAI = new GoogleGenerativeAI(apiKey);
   const systemInstruction = "你是專業命理大師「玄微老師」。用戶正在針對剛才的占卜結果向你請教。請保持專業與同理心，給予具體的解析與建議。";
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const chat = model.startChat({
-      history: history.map(h => ({
-        role: h.role === 'model' ? 'model' : 'user',
-        parts: h.parts
-      })),
-    });
+  const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash", "gemini-pro"];
 
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    return response.text() || "大師正在冥想中，請稍後再試。";
-  } catch (error: any) {
-    console.error("Chat Error:", error);
-    if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
-      return "【權限錯誤】：API Key 網域限制。";
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const chat = model.startChat({
+        history: history.map(h => ({
+          role: h.role === 'model' ? 'model' : 'user',
+          parts: h.parts
+        })),
+      });
+
+      const result = await chat.sendMessage(message);
+      const response = await result.response;
+      const text = response.text();
+      if (text) return text;
+    } catch (error: any) {
+      if (modelName === modelsToTry[modelsToTry.length - 1]) {
+        console.error("Chat all models failed:", error);
+        if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
+          return "【權限錯誤】：請檢查 API Key 網域限制。";
+        }
+        return `對話失敗：${error?.message || '請稍後再試'}`;
+      }
     }
-    return `對話失敗：${error?.message || '請稍後再試'}`;
   }
+  return "大師暫時無法回覆。";
 };
