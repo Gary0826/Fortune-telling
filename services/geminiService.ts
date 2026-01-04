@@ -4,7 +4,8 @@ import { ReadingMode, ReadingResult, SelectedTarot } from "../types.ts";
 
 
 export const fetchInterpretation = async (result: ReadingResult): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (import.meta as any).env?.API_KEY || '';
+  const ai = new GoogleGenAI(apiKey);
 
   let prompt = "";
   const systemInstruction = "你是專業命理大師「玄微老師」。語氣溫柔、專業、富有同理心且具神秘感。請用繁體中文回覆，針對用戶情況給予具體建議。";
@@ -52,7 +53,8 @@ export const chatWithAI = async (
   message: string,
   history: any[]
 ): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (import.meta as any).env?.API_KEY || '';
+  const ai = new GoogleGenAI(apiKey);
   const systemInstruction = "你是專業命理大師「玄微老師」。用戶正在針對剛才的占卜結果向你請教。請保持專業與同理心，給予具體的解析與建議。";
 
   try {

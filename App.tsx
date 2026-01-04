@@ -202,42 +202,23 @@ const App: React.FC = () => {
                 <h2 className="text-xl font-bold text-white">出生時刻配置</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8">
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-bold text-indigo-300 ml-1 flex items-center gap-2">
-                      <Star className="w-3 h-3" /> 出生日期
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-1">
-                        <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="年" />
-                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Year</span>
-                      </div>
-                      <div className="col-span-1">
-                        <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="月" />
-                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Month</span>
-                      </div>
-                      <div className="col-span-1">
-                        <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="日" />
-                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Day</span>
-                      </div>
+                    <label className="text-sm font-bold text-indigo-300 ml-1">出生日期 (年/月/日)</label>
+                    <div className="grid grid-cols-4 gap-3">
+                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="年" />
+                      <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="月" />
+                      <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="日" />
                     </div>
                   </div>
                 </div>
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-bold text-indigo-300 ml-1 flex items-center gap-2">
-                      <Clock className="w-3 h-3" /> 精確時間 (24H)
-                    </label>
+                    <label className="text-sm font-bold text-indigo-300 ml-1">精確時間 (時/分)</label>
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <input type="number" name="hour" min="0" max="23" value={userInfo.hour} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="時" />
-                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Hour</span>
-                      </div>
-                      <div>
-                        <input type="number" name="minute" min="0" max="59" value={userInfo.minute} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="分" />
-                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Min</span>
-                      </div>
+                      <input type="number" name="hour" min="0" max="23" value={userInfo.hour} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="時" />
+                      <input type="number" name="minute" min="0" max="59" value={userInfo.minute} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="分" />
                     </div>
                   </div>
                 </div>
