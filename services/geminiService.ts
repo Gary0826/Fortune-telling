@@ -2,11 +2,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { ReadingMode, ReadingResult, SelectedTarot } from "../types.ts";
 
+
 export const fetchInterpretation = async (result: ReadingResult): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
   let prompt = "";
-  const systemInstruction = "你是專業命理師「靈靈染」。語氣溫柔、專業、富有同理心且具神秘感。請用繁體中文回覆，針對用戶情況給予具體建議。";
+  const systemInstruction = "你是專業命理大師「玄微老師」。語氣溫柔、專業、富有同理心且具神秘感。請用繁體中文回覆，針對用戶情況給予具體建議。";
 
   const now = new Date();
   const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
@@ -23,25 +24,53 @@ export const fetchInterpretation = async (result: ReadingResult): Promise<string
     const { sun, moon, rising } = result.details;
     prompt = `今天是 ${dateStr}。用戶的太陽星座是${sun}，月亮星座是${moon}，上升星座是${rising}。請根據這黃金三角分析性格特質與近期運勢（事業、愛情、健康），並提供成長建議。`;
   } else if (result.type === ReadingMode.BAZI) {
-    const { main, element } = result.details;
-    prompt = `今天是 ${dateStr}。用戶的八字年柱為${main}，五行屬${element}。請根據五行生剋原理，分析用戶今年的流年運勢，並在事業、人際、健康方面給予指導。`;
+    const { year, month, day, hour } = result.details;
+    prompt = `今天是 ${dateStr}。用戶的八字為：年柱 ${year}, 月柱 ${month}, 日柱 ${day}, 時柱 ${hour}。請根據五行生剋與格局，分析用戶的性格、大運趨勢，並在事業、人際、健康方面給予指導。`;
   }
-
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
+      model: "gemini-1.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         systemInstruction,
         temperature: 0.8,
-        topP: 0.9,
-      },
+      }
     });
 
     return response.text || "占卜能量暫時中斷，請稍後再試。";
   } catch (error) {
     console.error("Gemini Error:", error);
     return "連接宇宙意識時發生錯誤，請檢查網路後再試。";
+  }
+};
+
+/**
+ * 續聊功能：針對之前的占卜結果持續對話
+ */
+export const chatWithAI = async (
+  message: string,
+  history: any[]
+): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const systemInstruction = "你是專業命理大師「玄微老師」。用戶正在針對剛才的占卜結果向你請教。請保持專業與同理心，給予具體的解析與建議。";
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        ...history,
+        { role: "user", parts: [{ text: message }] }
+      ],
+      config: {
+        systemInstruction,
+        temperature: 0.8,
+      }
+    });
+
+    return response.text || "大師正在冥想中，請稍後再試。";
+  } catch (error) {
+    console.error("Chat Error:", error);
+    return "大師正在冥想中，請稍後再試。";
   }
 };

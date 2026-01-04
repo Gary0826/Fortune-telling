@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles, Star, RotateCcw, ArrowRight, User,
-  MessageCircle, Compass, Info, ChevronLeft
+  MessageCircle, Compass, Info, ChevronLeft, Clock
 } from 'lucide-react';
 import { ReadingMode, UserInfo, ReadingResult, SelectedTarot, TarotCard } from './types.ts';
 import { calculateBazi, calculateAstroDetails } from './utils.ts';
 import { FULL_DECK } from './constants.tsx';
-import { fetchInterpretation } from './services/geminiService.ts';
+import { fetchInterpretation, chatWithAI } from './services/geminiService.ts';
 
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
   <div className={`bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-10 shadow-2xl ${className}`}>
@@ -54,7 +54,11 @@ const App: React.FC = () => {
   const [result, setResult] = useState<ReadingResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedCards, setSelectedCards] = useState<SelectedTarot[]>([]);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'model', parts: { text: string }[] }[]>([]);
+  const [chatLoading, setChatLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     localStorage.setItem('fortune_user_info', JSON.stringify(userInfo));
@@ -62,7 +66,16 @@ const App: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setUserInfo(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+    let val = parseInt(value) || 0;
+
+    // Simple validation
+    if (name === 'month') val = Math.max(1, Math.min(12, val));
+    if (name === 'day') val = Math.max(1, Math.min(31, val));
+    if (name === 'hour') val = Math.max(0, Math.min(23, val));
+    if (name === 'minute') val = Math.max(0, Math.min(59, val));
+    if (name === 'year') val = Math.max(1900, Math.min(2100, val));
+
+    setUserInfo(prev => ({ ...prev, [name]: val }));
   };
 
   const startReading = (mode: ReadingMode) => {
@@ -84,12 +97,12 @@ const App: React.FC = () => {
 
   const generateDirectResult = (mode: ReadingMode) => {
     if (mode === ReadingMode.BAZI) {
-      const bazi = calculateBazi(userInfo.year, userInfo.month, userInfo.day);
+      const bazi = calculateBazi(userInfo.year, userInfo.month, userInfo.day, userInfo.hour, userInfo.minute);
       setResult({
         type: mode,
         title: '八字命盤核心分析',
-        summary: `日主元神為「${bazi.stem.char}${bazi.stem.element}」，生肖屬${bazi.animal}。`,
-        details: { main: `${bazi.stem.char}${bazi.branch}`, element: bazi.stem.element }
+        summary: `元神為「${bazi.element}」，生肖屬${bazi.animal}。`,
+        details: bazi
       });
     } else if (mode === ReadingMode.ASTRO) {
       const astro = calculateAstroDetails(userInfo.year, userInfo.month, userInfo.day, userInfo.hour, userInfo.minute);
@@ -126,11 +139,35 @@ const App: React.FC = () => {
     try {
       const interpretation = await fetchInterpretation(result);
       setResult(prev => prev ? { ...prev, aiInterpretation: interpretation } : null);
+      setChatHistory([
+        { role: 'model', parts: [{ text: interpretation }] }
+      ]);
     } catch (e) {
       console.error(e);
       setResult(prev => prev ? { ...prev, aiInterpretation: "抱歉，目前無法連結宇宙意志，請稍後再試。" } : null);
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim() || !result || chatLoading) return;
+
+    const userMsg = chatMessage;
+    setChatMessage('');
+    setChatLoading(true);
+
+    const newHistory = [...chatHistory, { role: 'user' as const, parts: [{ text: userMsg }] }];
+    setChatHistory(newHistory);
+
+    try {
+      const response = await chatWithAI(userMsg, chatHistory);
+      setChatHistory(prev => [...prev, { role: 'model' as const, parts: [{ text: response }] }]);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -142,7 +179,7 @@ const App: React.FC = () => {
           className="group inline-flex cursor-pointer items-center gap-2.5 px-5 py-2.5 bg-indigo-500/10 rounded-full mb-6 ring-1 ring-indigo-400/20 hover:bg-indigo-500/20 transition-all"
         >
           <Sparkles className="w-5 h-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
-          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">LingLingRan Fortune v5.2</span>
+          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">玄微命理觀測站 v6.0</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-indigo-300 tracking-tight mb-5">
           {step === 4 ? '命運的啟示' : '探索宇宙的私語'}
@@ -165,23 +202,42 @@ const App: React.FC = () => {
                 <h2 className="text-xl font-bold text-white">出生時刻配置</h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-400 ml-1">出生日期</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="年" />
-                      <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="月" />
-                      <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-lg" placeholder="日" />
+                  <div className="space-y-3">
+                    <label className="text-sm font-bold text-indigo-300 ml-1 flex items-center gap-2">
+                      <Star className="w-3 h-3" /> 出生日期
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-1">
+                        <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="年" />
+                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Year</span>
+                      </div>
+                      <div className="col-span-1">
+                        <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="月" />
+                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Month</span>
+                      </div>
+                      <div className="col-span-1">
+                        <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="日" />
+                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Day</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-400 ml-1">精確時間 (24小時制)</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input type="number" name="hour" min="0" max="23" value={userInfo.hour} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="時" />
-                      <input type="number" name="minute" min="0" max="59" value={userInfo.minute} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono" placeholder="分" />
+                  <div className="space-y-3">
+                    <label className="text-sm font-bold text-indigo-300 ml-1 flex items-center gap-2">
+                      <Clock className="w-3 h-3" /> 精確時間 (24H)
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <input type="number" name="hour" min="0" max="23" value={userInfo.hour} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="時" />
+                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Hour</span>
+                      </div>
+                      <div>
+                        <input type="number" name="minute" min="0" max="59" value={userInfo.minute} onChange={handleInputChange} className="w-full bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="分" />
+                        <span className="block text-[10px] text-center text-slate-500 mt-1 uppercase font-bold tracking-tighter">Min</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -239,6 +295,11 @@ const App: React.FC = () => {
 
         {step === 3 && (
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="flex flex-col mb-8 text-center animate-pulse">
+              <h2 className="text-4xl md:text-5xl font-black text-indigo-400 mb-2">請先在心中默念</h2>
+              <h2 className="text-4xl md:text-5xl font-black text-indigo-400">自己想問的問題，再抽牌</h2>
+            </div>
+
             <div className="flex justify-between items-center mb-8">
               <Button variant="ghost" onClick={() => setStep(2)}><ChevronLeft className="w-4 h-4" /> 重新選擇</Button>
               <div className="text-indigo-300 font-bold bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20">
@@ -306,6 +367,40 @@ const App: React.FC = () => {
                 </div>
               </div>
 
+              {result.type === ReadingMode.BAZI && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                  {[
+                    { label: '年柱', val: result.details.year, sub: '根基' },
+                    { label: '月柱', val: result.details.month, sub: '環境' },
+                    { label: '日柱', val: result.details.day, sub: '自身' },
+                    { label: '時柱', val: result.details.hour, sub: '晚年' }
+                  ].map((p, i) => (
+                    <div key={i} className="bg-slate-800/40 p-6 rounded-3xl border border-slate-700/50 text-center hover:bg-indigo-500/5 transition-all">
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{p.label}</div>
+                      <div className="text-4xl font-black text-white mb-2 font-serif">{p.val}</div>
+                      <div className="text-[12px] font-medium text-indigo-400 opacity-60">{p.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {result.type === ReadingMode.ASTRO && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                  {[
+                    { label: '太陽星座', val: result.details.sun, sub: '自我 / 人格', icon: '☀️' },
+                    { label: '上升星座', val: result.details.rising, sub: '外在 / 面具', icon: '🌅' },
+                    { label: '月亮星座', val: result.details.moon, sub: '情感 / 潛意識', icon: '🌙' }
+                  ].map((p, i) => (
+                    <div key={i} className="bg-slate-800/40 p-8 rounded-3xl border border-slate-700/50 text-center hover:bg-indigo-500/5 transition-all">
+                      <div className="text-3xl mb-4">{p.icon}</div>
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{p.label}</div>
+                      <div className="text-3xl font-black text-white mb-2">{p.val}</div>
+                      <div className="text-[12px] font-medium text-indigo-400 opacity-60">{p.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {result.type === ReadingMode.TAROT && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                   {result.details.selectedCards.map((c: SelectedTarot, i: number) => (
@@ -331,7 +426,7 @@ const App: React.FC = () => {
                     <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
                       <MessageCircle className="w-8 h-8 text-indigo-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">靈靈染 AI 深度解析</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">玄微大師 深度解析</h3>
                     <p className="text-slate-400 text-center max-w-sm mb-8 px-6">
                       由先進的 Gemini AI 模型為您進行多維度的命運深度解析，提供事業、感情與生活的具體建議。
                     </p>
@@ -345,19 +440,60 @@ const App: React.FC = () => {
                   </div>
                 ) : (
                   <div className="animate-in fade-in slide-in-from-top-4 duration-1000">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                        <Sparkles className="text-white w-4 h-4" />
+                    <div className="flex items-center gap-3 mb-6 font-master title-font">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                        <Sparkles className="text-white w-5 h-5" />
                       </div>
-                      <h3 className="text-xl font-bold text-white">靈靈染的深度啟示</h3>
+                      <h3 className="text-2xl font-black text-white">玄微大師的深度啟示</h3>
                     </div>
-                    <div className="bg-indigo-500/5 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-indigo-500/10 leading-relaxed text-slate-200 shadow-inner">
-                      <div className="prose prose-invert max-w-none whitespace-pre-wrap text-lg">
-                        {result.aiInterpretation}
+
+                    <div className="bg-slate-900/80 backdrop-blur-md p-8 md:p-10 rounded-3xl border border-indigo-500/20 leading-relaxed text-slate-200 shadow-2xl space-y-6 max-h-[500px] overflow-y-auto hide-scrollbar">
+                      {chatHistory.map((chat, idx) => (
+                        <div key={idx} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+                          <div className={`max-w-[85%] p-5 rounded-3xl shadow-lg ${chat.role === 'user'
+                            ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-tr-none'
+                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/50'
+                            }`}>
+                            <div className="text-base leading-relaxed whitespace-pre-wrap break-words">
+                              {chat.parts[0].text}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start animate-pulse">
+                          <div className="bg-slate-800 p-4 rounded-3xl rounded-tl-none border border-slate-700/50">
+                            <div className="flex gap-2">
+                              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-.3s]"></div>
+                              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-.5s]"></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    <div className="mt-10 mb-6 group relative">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                      <div className="relative flex items-center gap-3 bg-slate-900 border border-slate-700 rounded-2xl p-2 pl-4 pr-2">
+                        <input
+                          type="text"
+                          placeholder="向大師繼續發問..."
+                          value={chatMessage}
+                          onChange={(e) => setChatMessage(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                          className="flex-1 bg-transparent border-none outline-none text-white text-base py-2"
+                        />
+                        <Button onClick={handleSendMessage} disabled={chatLoading} className="h-10 px-4 py-0 rounded-xl">
+                          {chatLoading ? <RotateCcw className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                        </Button>
                       </div>
                     </div>
-                    <div className="mt-8 flex justify-center">
-                      <Button variant="outline" onClick={() => window.print()} className="h-12"><Info className="w-4 h-4" /> 匯出我的命運報告</Button>
+
+                    <div className="flex justify-center mt-8 space-x-4">
+                      <Button variant="outline" onClick={() => window.print()} className="h-12"><Info className="w-4 h-4" /> 匯出報告</Button>
+                      <Button variant="ghost" onClick={() => { setStep(2); setResult(null); setChatHistory([]); }} className="h-12 border border-slate-700">下一位占友</Button>
                     </div>
                   </div>
                 )}
@@ -365,7 +501,7 @@ const App: React.FC = () => {
             </Card>
 
             <footer className="text-center py-10 opacity-40 hover:opacity-100 transition-opacity">
-              <p className="text-slate-500 text-xs">© 2025 靈靈染命運觀測站. 所有解析僅供參考，未來掌握在您的手中。</p>
+              <p className="text-slate-500 text-xs">© 2026 玄微命理觀測站. 所有解析僅供參考，未來掌握在您的手中。</p>
             </footer>
           </div>
         )}
