@@ -64,10 +64,10 @@ export const calculateBazi = (year: number, month: number, day: number, hour: nu
   };
 
   return {
-    year: HEAVENLY_STEMS[yearStemIdx] + EARTHLY_BRANCHES[yearBranchIdx],
-    month: HEAVENLY_STEMS[monthStemIdx] + EARTHLY_BRANCHES[(monthIdx + 2) % 12],
-    day: HEAVENLY_STEMS[finalDayStemIdx] + EARTHLY_BRANCHES[finalDayBranchIdx],
-    hour: HEAVENLY_STEMS[hourStemIdx] + EARTHLY_BRANCHES[hourIdx],
+    year: HEAVENLY_STEMS[yearStemIdx].char + EARTHLY_BRANCHES[yearBranchIdx],
+    month: HEAVENLY_STEMS[monthStemIdx].char + EARTHLY_BRANCHES[(monthIdx + 2) % 12],
+    day: HEAVENLY_STEMS[finalDayStemIdx].char + EARTHLY_BRANCHES[finalDayBranchIdx],
+    hour: HEAVENLY_STEMS[hourStemIdx].char + EARTHLY_BRANCHES[hourIdx],
     element: getElement(finalDayStemIdx),
     animal: ZODIAC_ANIMALS[yearBranchIdx]
   };
