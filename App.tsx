@@ -481,7 +481,12 @@ const App: React.FC = () => {
                           placeholder="向大師繼續發問..."
                           value={chatMessage}
                           onChange={(e) => setChatMessage(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                              e.preventDefault();
+                              handleSendMessage();
+                            }
+                          }}
                           className="flex-1 bg-transparent border-none outline-none text-white text-base py-2"
                         />
                         <Button onClick={handleSendMessage} disabled={chatLoading} className="h-10 px-4 py-0 rounded-xl">
