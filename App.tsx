@@ -66,14 +66,23 @@ const App: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    let val = parseInt(value) || 0;
+    setUserInfo(prev => ({ ...prev, [name]: value }));
+  };
 
-    // Simple validation
-    if (name === 'month') val = Math.max(1, Math.min(12, val));
-    if (name === 'day') val = Math.max(1, Math.min(31, val));
-    if (name === 'hour') val = Math.max(0, Math.min(23, val));
-    if (name === 'minute') val = Math.max(0, Math.min(59, val));
-    if (name === 'year') val = Math.max(1900, Math.min(2100, val));
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let val = parseInt(value);
+
+    if (isNaN(val)) {
+      const defaults: Record<string, number> = { year: 1998, month: 8, day: 8, hour: 12, minute: 0 };
+      val = defaults[name] ?? 0;
+    } else {
+      if (name === 'month') val = Math.max(1, Math.min(12, val));
+      if (name === 'day') val = Math.max(1, Math.min(31, val));
+      if (name === 'hour') val = Math.max(0, Math.min(23, val));
+      if (name === 'minute') val = Math.max(0, Math.min(59, val));
+      if (name === 'year') val = Math.max(1900, Math.min(2100, val));
+    }
 
     setUserInfo(prev => ({ ...prev, [name]: val }));
   };
@@ -96,8 +105,14 @@ const App: React.FC = () => {
   };
 
   const generateDirectResult = (mode: ReadingMode) => {
+    const y = Number(userInfo.year);
+    const m = Number(userInfo.month);
+    const d = Number(userInfo.day);
+    const h = Number(userInfo.hour);
+    const min = Number(userInfo.minute);
+
     if (mode === ReadingMode.BAZI) {
-      const bazi = calculateBazi(userInfo.year, userInfo.month, userInfo.day, userInfo.hour, userInfo.minute);
+      const bazi = calculateBazi(y, m, d, h, min);
       setResult({
         type: mode,
         title: '八字命盤核心分析',
@@ -105,7 +120,7 @@ const App: React.FC = () => {
         details: bazi
       });
     } else if (mode === ReadingMode.ASTRO) {
-      const astro = calculateAstroDetails(userInfo.year, userInfo.month, userInfo.day, userInfo.hour, userInfo.minute);
+      const astro = calculateAstroDetails(y, m, d, h, min);
       setResult({
         type: mode,
         title: '星盤性格與運勢概覽',
@@ -179,7 +194,7 @@ const App: React.FC = () => {
           className="group inline-flex cursor-pointer items-center gap-2.5 px-5 py-2.5 bg-indigo-500/10 rounded-full mb-6 ring-1 ring-indigo-400/20 hover:bg-indigo-500/20 transition-all"
         >
           <Sparkles className="w-5 h-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
-          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">玄微命理觀測站 v7.0</span>
+          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">玄微命理觀測站 v8.0</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-indigo-300 tracking-tight mb-5">
           {step === 4 ? '命運的啟示' : '探索宇宙的私語'}
@@ -207,9 +222,9 @@ const App: React.FC = () => {
                   <div className="space-y-3">
                     <label className="text-sm font-bold text-indigo-300 ml-1">出生日期 (年/月/日)</label>
                     <div className="grid grid-cols-4 gap-3">
-                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="年" />
-                      <input type="number" name="month" min="1" max="12" value={userInfo.month} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="月" />
-                      <input type="number" name="day" min="1" max="31" value={userInfo.day} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="日" />
+                      <input type="number" name="year" value={userInfo.year} onChange={handleInputChange} onBlur={handleBlur} className="col-span-2 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="年" />
+                      <input type="number" name="month" value={userInfo.month} onChange={handleInputChange} onBlur={handleBlur} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="月" />
+                      <input type="number" name="day" value={userInfo.day} onChange={handleInputChange} onBlur={handleBlur} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="日" />
                     </div>
                   </div>
                 </div>
@@ -217,8 +232,8 @@ const App: React.FC = () => {
                   <div className="space-y-3">
                     <label className="text-sm font-bold text-indigo-300 ml-1">精確時間 (時/分)</label>
                     <div className="grid grid-cols-2 gap-3">
-                      <input type="number" name="hour" min="0" max="23" value={userInfo.hour} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="時" />
-                      <input type="number" name="minute" min="0" max="59" value={userInfo.minute} onChange={handleInputChange} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="分" />
+                      <input type="number" name="hour" value={userInfo.hour} onChange={handleInputChange} onBlur={handleBlur} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="時" />
+                      <input type="number" name="minute" value={userInfo.minute} onChange={handleInputChange} onBlur={handleBlur} className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-center focus:ring-2 focus:ring-indigo-500 outline-none text-white font-mono text-xl shadow-inner" placeholder="分" />
                     </div>
                   </div>
                 </div>

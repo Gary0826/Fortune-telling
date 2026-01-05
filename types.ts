@@ -6,11 +6,11 @@ export enum ReadingMode {
 }
 
 export interface UserInfo {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
+  year: number | string;
+  month: number | string;
+  day: number | string;
+  hour: number | string;
+  minute: number | string;
 }
 
 export interface TarotCard {
