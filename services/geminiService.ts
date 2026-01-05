@@ -71,12 +71,20 @@ export const chatWithAI = async (
 
   for (const modelName of modelsToTry) {
     try {
+      // 防禦性程式碼：確保 history 的第一個訊息一定是 'user'
+      // 如果不是，則過濾掉開頭的 'model' 訊息，直到找到第一個 'user'
+      let sanitizedHistory = history.map(h => ({
+        role: h.role === 'model' ? 'model' : 'user' as 'user' | 'model',
+        parts: h.parts
+      }));
+
+      while (sanitizedHistory.length > 0 && sanitizedHistory[0].role !== 'user') {
+        sanitizedHistory.shift();
+      }
+
       const model = genAI.getGenerativeModel({ model: modelName });
       const chat = model.startChat({
-        history: history.map(h => ({
-          role: h.role === 'model' ? 'model' : 'user',
-          parts: h.parts
-        })),
+        history: sanitizedHistory,
       });
 
       // 將身份設定放入提問中，確保大師不會忘記自己是誰

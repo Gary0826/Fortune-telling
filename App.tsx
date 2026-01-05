@@ -154,8 +154,10 @@ const App: React.FC = () => {
     try {
       const interpretation = await fetchInterpretation(result);
       setResult(prev => prev ? { ...prev, aiInterpretation: interpretation } : null);
+
+      // 修復：Google AI SDK 要求對話紀錄必須由 'user' role 開始
       setChatHistory([
-        { role: 'user', parts: [{ text: "大師，請針對剛才的占卜結果進行深度解析。" }] },
+        { role: 'user', parts: [{ text: "大師，請為我剛才的占卜結果進行深度解析。" }] },
         { role: 'model', parts: [{ text: interpretation }] }
       ]);
     } catch (e) {
