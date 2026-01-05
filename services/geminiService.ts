@@ -79,13 +79,15 @@ export const chatWithAI = async (
         })),
       });
 
-      const result = await chat.sendMessage(message);
+      // 將身份設定放入提問中，確保大師不會忘記自己是誰
+      const fullMessage = `${systemInstruction}\n\n用戶提問：${message}`;
+      const result = await chat.sendMessage(fullMessage);
       const response = await result.response;
       const text = response.text();
       if (text) return text;
     } catch (error: any) {
+      console.error(`Chat with model ${modelName} failed:`, error.message);
       if (modelName === modelsToTry[modelsToTry.length - 1]) {
-        console.error("Chat all models failed:", error);
         if (error?.message?.includes('referrer') || error?.message?.includes('403')) {
           return "【權限錯誤】：請檢查 API Key 網域限制。";
         }

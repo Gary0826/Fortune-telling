@@ -155,6 +155,7 @@ const App: React.FC = () => {
       const interpretation = await fetchInterpretation(result);
       setResult(prev => prev ? { ...prev, aiInterpretation: interpretation } : null);
       setChatHistory([
+        { role: 'user', parts: [{ text: "大師，請針對剛才的占卜結果進行深度解析。" }] },
         { role: 'model', parts: [{ text: interpretation }] }
       ]);
     } catch (e) {
@@ -194,7 +195,7 @@ const App: React.FC = () => {
           className="group inline-flex cursor-pointer items-center gap-2.5 px-5 py-2.5 bg-indigo-500/10 rounded-full mb-6 ring-1 ring-indigo-400/20 hover:bg-indigo-500/20 transition-all"
         >
           <Sparkles className="w-5 h-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
-          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">玄微命理觀測站 v8.0</span>
+          <span className="text-indigo-200 font-bold tracking-widest text-sm uppercase">玄微 · 命運觀測站</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-b from-white to-indigo-300 tracking-tight mb-5">
           {step === 4 ? '命運的啟示' : '探索宇宙的私語'}
